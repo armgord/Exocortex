@@ -11,8 +11,6 @@ Schematics and PCBs are designed in **KiCad**.
 
 > 🚧 **Status: work in progress.** Both schematics are complete. The M1 PCB layout is being routed, M2 is being prepared for fabrication, and the firmware is at an early polling stage. See [Roadmap](#roadmap).
 
-> 📄 **Design report:** [`docs/BCI_Design_Report.pdf`](docs/BCI_Design_Report.pdf)
-
 ---
 
 ## System Overview
