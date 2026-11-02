@@ -7,6 +7,8 @@ Design of an **8-channel EEG acquisition system** for a brain–computer interfa
 
 Schematics and PCBs are designed in **KiCad**.
 
+> 🧠 **Built on PolyCortex's open EEG work.** The M1 analog front end is based directly on the acquisition boards published by [**PolyCortex**](https://github.com/PolyCortex/AcquisitionEEG), a student neurotechnology society at Polytechnique Montréal. Their v2.2 and v3.0 designs define the signal-chain architecture, component choices and filter specifications that M1 follows. This repo adapts that design rather than claiming it as original. See [Acknowledgments](#acknowledgments--polycortex) for exactly what was adopted and what was changed.
+
 > 🚧 **Status: work in progress.** Both schematics are complete. The M1 PCB layout is being routed, M2 is being prepared for fabrication, and the firmware is at an early polling stage. See [Roadmap](#roadmap).
 
 > 📄 **Design report:** [`docs/BCI_Design_Report.pdf`](docs/BCI_Design_Report.pdf)
@@ -51,6 +53,8 @@ flowchart LR
 ---
 
 ## M1 — Discrete Analog Front End
+
+> **Design lineage:** this front end reproduces the PolyCortex acquisition chain (protection → in-amp → 0.3–35 Hz bandpass → 60 Hz notch → final gain, ±9 V supply, RLD and RF filtering from their v3.0 prototype), redrawn in KiCad and extended from 4 to 8 channels. Cutoffs match their published values, and gains are essentially the same: in-amp ≈ 398–400 and total ≈ 47,400–50,000.
 
 ### Signal chain (per channel)
 
@@ -136,14 +140,49 @@ images/                 Figures used in this README
 
 ---
 
+## Acknowledgments — PolyCortex
+
+This project would not exist without **[PolyCortex](https://github.com/PolyCortex)**, the Polytechnique Montréal student society that openly documented its home-made EEG acquisition pipeline in **[PolyCortex/AcquisitionEEG](https://github.com/PolyCortex/AcquisitionEEG)**. Their write-ups, DipTrace schematics, LTspice simulations and component lists were the primary reference for M1. Thanks to the PolyCortex team and contributors, including Charles Bélanger Nzakimuena, and Alexandre Marcotte for the companion [PolyCortex GUI](https://github.com/AlexandreMarcotte/PolyCortex_Gui).
+
+### Adopted from PolyCortex
+
+| Element | PolyCortex design |
+|---|---|
+| Overall architecture | Discrete per-channel AFE: protection → in-amp → filters → final gain → ADC → MCU |
+| Instrumentation amplifier | AD8422, gain ≈ 398 |
+| Bandpass | 2nd-order Butterworth HPF 0.3 Hz + 2nd-order Butterworth LPF 35 Hz |
+| Mains rejection | 60 Hz notch, ≈ −30 dB simulated |
+| Final gain | Non-inverting op-amp stage, total gain ≈ 47,400 |
+| Protection | TPD4E1B06 bidirectional TVS arrays |
+| Supply | ±9 V from batteries, chosen to avoid op-amp saturation |
+| Common-mode / EMI (v3.0 prototype) | Right-leg driver, RF filters on inputs |
+| Components | LM324 op-amps, EMI filters, ADS7828 ADC (from their ADC test PCB) |
+
+### Changed or added in this project
+
+| Element | This project |
+|---|---|
+| Channel count | 8 channels (PolyCortex boards: 4) |
+| EDA tool | Redrawn from scratch in **KiCad** (originals in DipTrace) |
+| ADC | ADS7828 12-bit, 8-ch, I²C, used as the main acquisition ADC for all 8 channels |
+| MCU | STM32 Nucleo-64 with a custom HAL driver (PolyCortex used an Arduino Uno R3) |
+| Power for ADC | LP2985 3.3 V LDO + REF3330 3.3 V reference |
+| M2 board | Separate ADS1299-based design with on-board STM32F303, IMU and USB power; not part of PolyCortex's work |
+
+> PolyCortex's repository does not state a license, so **none of their original files are redistributed here**. All schematics and layouts in this repo were redrawn in KiCad, and anyone wanting the originals should get them from the [PolyCortex repo](https://github.com/PolyCortex/AcquisitionEEG).
+
+The M2 design also draws on the **[OpenBCI](https://openbci.com)** Cyton board as a reference for ADS1299-based EEG acquisition, and the planned headset is OpenBCI's open-source **Ultracortex**.
+
+---
+
 ## References
 
+- PolyCortex, [AcquisitionEEG: acquisition PCB design files and documentation](https://github.com/PolyCortex/AcquisitionEEG), primary design reference for M1
 - Texas Instruments, [ADS1299 datasheet](https://www.ti.com/lit/ds/symlink/ads1299.pdf)
 - Texas Instruments, [SBAA188: Improving Common-Mode Rejection Using the Right-Leg Drive Amplifier](http://www.ti.com/lit/an/sbaa188/sbaa188.pdf)
 - TI E2E forum, [ADS1299: testing bias / right-leg drive](https://e2e.ti.com/support/data-converters-group/data-converters/f/data-converters-forum/696153/ads1299-ads1299-testing-bias-right-leg-drive)
-- PolyCortex, [AcquisitionEEG](https://github.com/PolyCortex/AcquisitionEEG)
 - [Sparky: testing and building](https://buildandcrash.blogspot.com/2013/05/sparky-testing-and-building-no-crashing.html)
 
 ---
 
-**Author:** Armando Gordillo Ramírez
+**Author:** Armando Gordillo Ramírez. M1 analog front end adapted from [PolyCortex/AcquisitionEEG](https://github.com/PolyCortex/AcquisitionEEG).
