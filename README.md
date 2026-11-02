@@ -118,8 +118,6 @@ hardware/
   m2_ads1299/           KiCad project: schematic + PCB
 firmware/
   m1_stm32_ads7828/     STM32 HAL driver for the ADS7828
-docs/
-  BCI_Design_Report.pdf Design report
 images/                 Figures used in this README
 ```
 
